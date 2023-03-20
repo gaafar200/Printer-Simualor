@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block head %}
+<title>Main</title>
+{% endblock %}
+{% block body %}
+<form method="POST" action="/print">
+    <input type="text" name="text">
+</form>    
+{% endblock %}
