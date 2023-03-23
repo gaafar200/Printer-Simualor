@@ -103,14 +103,15 @@ class Printer:
     def cancelcurrentRequest(self):
         if self.__status == printerStatus.printerStatus.printing or self.__status == printerStatus.printerStatus.Paused:
             self.__status =  printerStatus.printerStatus.cancelled
+            self.__currentKey
     def cancel(self,key):
         if key == self.__currentKey:
             self.cancelcurrentRequest()
         else:
             self.cancelSpecificOne(key)         
     def checkIfThereIsAPaperJam(self):
-        x =  random.randint(0, 99)
-        if x == 45:
+        x =  random.randint(0, 999)
+        if x == 445:
            return True           
         return False
     def fixPaperJam(self):
@@ -155,12 +156,13 @@ class Printer:
         if self.keyFound(text):
             return text + str(random.randint(0,1000))
         return text
-    def test(self):
-        pq_list = []
-        while not self.__printingQueue.empty():
-            pq_list.append(self.__printingQueue.get())
-        return pq_list
-
+    def getAllPrintingTasks(self):
+        oldlist = []
+        oldlist.append({self.__currentKey:self.__currentText})
+        newlist = list(self.__printingQueue.queue)
+        oldlist.extend(newlist)
+        return oldlist
+        
     def getPrintStatus(self,key):
         if self.keyFound(key):
             return "Waiting"
@@ -184,3 +186,4 @@ class Printer:
         for item in list(self.__printingQueue.queue):
             if key in item:
                 self.__printingQueue.get(item)
+                

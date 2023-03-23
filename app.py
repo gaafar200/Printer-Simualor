@@ -14,10 +14,15 @@ def print():
     return redirect(redircted_url)
 @app.get("/test")
 def test():
-    return printer.getAllPrintOperation()
+    list =  printer.getAllPrintingTasks()
+    return render_template('index.html', q=list)
 @app.get("/status/<string:key>")
 def status(key):
     return printer.getPrintStatus(key)
-        
+
+@app.get("/cancel/<string:key>")
+def cancel(key):
+    printer.cancel(key)
+    return "done"
 if __name__ == "__main__":
     app.run(debug=True)
