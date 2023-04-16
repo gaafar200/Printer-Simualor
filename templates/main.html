@@ -1,9 +1,92 @@
 {% extends 'base.html' %}
 {% block head %}
-<title>Main</title>
+<title>Printer</title>
+ <!-- Google Fonts -->
+ <link href="https://fonts.gstatic.com" rel="preconnect">
+ <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+ <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
+ <link rel="stylesheet" href="{{url_for('static',filename='css/bootstrap-icons.css')}}">
 {% endblock %}
 {% block body %}
-<form method="POST" action="/print">
-    <input type="text" name="text">
-</form>    
+<main id="main" class="main">
+    <section class="side-bar-section" id="side-bar-section">
+        <h3>Printer Actions</h3>
+        <ul>
+            <li>
+                <button type="button" id="pause" class="btn btn-outline-warning">Pause Printer</button>
+                <button  id="resume" type="button" class="hidden btn btn-outline-primary">Resume Printer</button>
+            </li>
+            <li>
+                <button id="paper" type="button" class="disabled btn btn-outline-success">Refill Paper</button>
+            </li>
+            <li>
+                <button id="ink" type="button" class="disabled btn btn-outline-success">Refill Ink</button>
+            </li>
+            <li>
+                <button id="paperJam" type="button" class="disabled btn btn-outline-success">Fix Paper Jam</button>
+            </li>
+            <li>
+                <button id="resetPrinter" type="button" class="btn btn-outline-success">Reset Printer</button>
+            </li>
+            <li>
+                <button id="offline" type="button" class="btn btn-outline-danger">OffLine</button>
+                <button id="online" type="button" class="hidden btn btn-outline-success">OnLine</button>
+            </li>
+            <li class="last-li">
+                <button type="button" id="errors" class="disabled btn btn-danger"><i class="bi bi-exclamation-octagon"></i></button>
+                <button type="button" id="warning" class="disabled btn btn-warning"><i class="bi bi-exclamation-triangle"></i></button>
+                <button type="button" id="info" class="btn btn-info"><i class="bi bi-info-circle"></i></button>
+            </li>
+            <li class="alerts">
+               
+                <div id="warningSection" class="myalert-warning hidden">
+                    <span></span>
+                </div>
+                <div id="error" class="myalert-danger hidden">
+                    <span></span>
+                </div>
+                <div class="myalert-info hidden">
+                    <span>This Is model 3.5.1 Printer</span>
+                </div>
+            </li>        
+        </ul>    
+    </section>
+    <section id="up-bar-section" class="up-bar-section">
+        <div class="up-bar-content">
+            <ul>
+                <li>
+                    <div id="status"><i class="bi bi-cpu"></i><spam></spam></div>
+                </li>
+                <li>
+                    <div id="ink"><i class="bi bi-brush-fill"></i><spam></spam></div>
+                </li>
+                <li>
+                    <div id="paper"><i class="bi bi-newspaper"></i><spam></spam></div>
+                </li>
+            </ul>
+        </div>    
+        <div class="main-part" id="main-part">
+            <h2>Start Printing</h2>
+            <form class="print" method="POST" action="/print">
+                <textarea class="text" required placeholder="Enter Your String"></textarea>
+                <button class="print-button">Print</button>
+            </form>   
+        </div>        
+    </section>
+    <section id="right-bar-section" class="right-bar-section">
+        <h3>Current Tasks</h3>
+        <div class="search-bar">
+            <form class="search-form d-flex align-items-center" method="POST" action="#">
+                <div class="search">
+                    <input type="text" name="query" placeholder="Search" title="Enter search keyword">
+                    <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+        <div class="side-bar-tasks">
+
+        </div>               
+    </section>
+</main>
+<script src="static/js/main.js" ></script>    
 {% endblock %}

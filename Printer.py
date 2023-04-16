@@ -3,11 +3,8 @@ import time
 import threading
 import random
 import math
-import os
-from io import BytesIO
+from fpdf import FPDF
 import queue
-from reportlab.pdfgen import canvas
-from PyPDF2 import PdfFileReader, PdfFileWriter
 class Printer:
     __printer = None
     __status = printerStatus.printerStatus.idle
@@ -15,6 +12,8 @@ class Printer:
     __ink = 1000
     __currentKey = None
     __currentText = None
+    __oldState1=printerStatus.printerStatus.unknown
+    __oldState2=printerStatus.printerStatus.unknown
     __printingQueue = queue.Queue()
     def getInstance():
         if Printer.__printer == None:
@@ -37,9 +36,10 @@ class Printer:
             time.sleep(0.1)    
             
     def simulatePrinting(self,item):
-        key = list(item.keys())[0]
+        key =item["key"]
         self.__currentKey = key
-        text = item[key]
+        print(self.__currentKey)
+        text = item["value"]
         self.__currentText = text
         if self.checkText(text):
             print("The Printer Has encontered an error and can't continue printing {text}")
@@ -55,7 +55,8 @@ class Printer:
             self.__status = printerStatus.printerStatus.outOfPaper
             while self.__status == printerStatus.printerStatus.outOfPaper:
                 time.sleep(0.1)
-            self.__status = old_state      
+            self.__status = old_state
+            
         if self.__status == printerStatus.printerStatus.idle:
             self.__status = printerStatus.printerStatus.printing
         for i in range(1,10):
@@ -68,13 +69,15 @@ class Printer:
                 self.__status = old_state
             if self.checkIfCanceled(text):
                 return
+            if self.__status == printerStatus.printerStatus.offLine:
+                while self.__status == printerStatus.printerStatus.offLine:
+                    time.sleep(0.1)
             if self.__status == printerStatus.printerStatus.Paused:
                 print("Printer is paused")
                 while self.__status == printerStatus.printerStatus.Paused:
                     if self.checkIfCanceled(text):
                         return
                     time.sleep(0.1)
-                self.status = "Printing"
                 print(f"Printer has resumed printing {text}") 
             time.sleep(1)
             
@@ -90,13 +93,14 @@ class Printer:
         return False    
     def pause(self):
         if self.__status != printerStatus.printerStatus.paperJam:
+            self.__oldState1 = self.__status
             self.__status = printerStatus.printerStatus.Paused
     def resume(self):
         if self.__status == printerStatus.printerStatus.Paused:
-            self.__status =  printerStatus.printerStatus.printing
+            self.__status = self.__oldState1
     def print(self,text):
         key = self.createSpecialKey(text)
-        self.__printingQueue.put({key:text})
+        self.__printingQueue.put({"key":key,"value":text})
         return key
     def getStatus(self):
         return  self.__status   
@@ -143,12 +147,15 @@ class Printer:
             return True
         return False
     def finishPrintingOperation(self,text):
-        print(text)
-        pass
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(200, 10, text)
+        pdf.output("data/" + text  +".pdf")
     def keyFound(self,key):
         key_found = False
         for item in list(self.__printingQueue.queue):
-            if key in item:
+            if item["key"] == key:
                 key_found = True
                 break
         return key_found
@@ -158,11 +165,18 @@ class Printer:
         return text
     def getAllPrintingTasks(self):
         oldlist = []
-        oldlist.append({self.__currentKey:self.__currentText})
+        if(self.__currentKey != None):
+            oldlist.append({"key":self.__currentKey,"value":self.__currentText});  
         newlist = list(self.__printingQueue.queue)
         oldlist.extend(newlist)
         return oldlist
-        
+    def getPrintingTasksData(self):
+        mylist = self.getAllPrintingTasks()
+        for l in mylist:
+            key =l["key"]
+            print(key)
+            l["status"] = self.getPrintStatus(key)
+        return mylist        
     def getPrintStatus(self,key):
         if self.keyFound(key):
             return "Waiting"
@@ -187,3 +201,21 @@ class Printer:
             if key in item:
                 self.__printingQueue.get(item)
                 
+    def getPrinterStatus(self):
+        return self.__status
+    def getNumberOfPaper(self):
+        return self.__paper
+    
+    def getAmountOfInk(self):
+        return self.__ink
+    
+    def setOffLine(self):
+        self.__oldState2 = self.__status
+        self.__status = printerStatus.printerStatus.offLine
+        
+    def setOnLine(self):
+        self.__status = self.__oldState2   
+
+        
+             
+                 
