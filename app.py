@@ -19,7 +19,7 @@ def getdata():
 def print():
     text = request.form['text']
     key =  printer.print(text)
-    return "True"
+    return {"message":"Print Request Processed SucessFully","key":key}
 @app.get("/test")
 def test():
     list =  printer.getPrintingTasksData()
@@ -61,8 +61,17 @@ def offline():
 @app.post("/online")
 def online():
     printer.setOnLine()
-    return "printer Is Now Online"         
+    return "printer Is Now Online"
+@app.get("/printingTasks")
+def getPrintingTasks():
+    list = printer.getPrintingTasksData()
+    return {"printingQueue":list}
+@app.get("/status")
+def printerStatus():
+    status = printer.getStatus()
+    return {"status":status.name}
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host="0.0.0.0")
     
     
