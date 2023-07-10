@@ -1,16 +1,18 @@
-import unittest
-from app import app
 import json
-class TestPrinter(unittest.TestCase):
-    def setUp(self):
+import pytest
+from app import app  # Import the Flask application object
+
+class TestPrinter:
+    
+
+    def setup_method(self, method):
         app.config['TESTING'] = True
         self.client = app.test_client()
 
 
-
-    def test_print_job_submistion(self):
+    def test_print_job_submission(self):
         with app.test_client() as client:
-            data = {"text":"mahmoud"}
+            data = {"text": "mahmoud"}
             response = client.post('/print', data=data, follow_redirects=True)
             assert response.status_code == 200
             response_dict = json.loads(response.data)
@@ -23,42 +25,45 @@ class TestPrinter(unittest.TestCase):
                 if item['key'] == key:
                     found = True
                     break
-            assert found, "print Task doesn't exists in printing Queue"
+            assert found, "print Task doesn't exist in printing Queue"
+
+
 
     def test_printer_status(self):
-        #printer initial State
-        status = self.getStatus()
+        # Printer initial state
+        status = self.get_status()
         assert status == "idle"
-        #printer paused state
+
+        # Printer paused state
         response = self.client.post("/pause")
         assert response.status_code == 200
         assert b'paused Successfully' in response.data
-        status = self.getStatus()
+        status = self.get_status()
         assert status == "Paused"
-        #printer offline state
-        response = self.client.post("offline")
+
+        # Printer offline state
+        response = self.client.post("/offline")
         assert response.status_code == 200
-        assert b'Printer Is Now OffLine' in response.data
-        status = self.getStatus()
+        assert b'printer is now offline' in response.data.lower()
+        status = self.get_status()
         assert status == 'offLine'
-        #printer back online (get Last State)
-        response = self.client.post("online")
+
+        # Printer back online (get last state)
+        response = self.client.post("/online")
         assert response.status_code == 200
-        assert b'printer Is Now Online' in response.data
-        status = self.getStatus()
+        assert b'printer is now online' in response.data.lower()
+        status = self.get_status()
         assert status == 'Paused'
-        #printer resume state
+
+        # Printer resume state
         response = self.client.post("/resume")
         assert response.status_code == 200
         assert b'Resumed Successfully' in response.data
-        status = self.getStatus()
+        status = self.get_status()
         assert status == 'idle'
 
-
-
-
-    def getStatus(self):
+    def get_status(self):
         response = self.client.get("status")
         assert response.status_code == 200
         response_dict = json.loads(response.data)
-        return response_dict["status"]
+        return response_dict["status"]        
